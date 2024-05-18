@@ -131,7 +131,9 @@ class CustomerService {
 
     async ManageOrder(customerId, order){
         try {
+            console.log('hm aa toh gye manage krne order.');
             const orderResult = await this.repository.AddOrderToProfile(customerId, order);
+            console.log("manage hua ki nahi wo tm dkh lo", orderResult);
             return FormateData(orderResult);
         } catch (err) {
             throw new APIError('Data Not found', err)
@@ -140,8 +142,10 @@ class CustomerService {
 
     async SubscribeEvents(payload){
         console.log("Something came for subscription");
+        payload = JSON.parse(payload);
  
         const { event, data } =  payload;
+        console.log("event", event);
 
         const { userId, product, order, qty } = data;
 
@@ -157,6 +161,7 @@ class CustomerService {
                 this.ManageCart(userId,product,qty, true);
                 break;
             case 'CREATE_ORDER':
+                console.log("CREATE_ORDER");
                 this.ManageOrder(userId,order);
                 break;
             case 'TESTING':

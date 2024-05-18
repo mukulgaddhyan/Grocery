@@ -51,6 +51,8 @@ class ShoppingService {
   async SubscribeEvents(payload){
     console.log("Something came for subscription in Shopping Service");
 
+    payload = JSON.parse(payload);
+
     const { event, data } =  payload;
 
     const { userId, product, qty } = data;
@@ -71,7 +73,7 @@ class ShoppingService {
   async GetOrderPaylaod(userId, order, event){
     if(order){
         let payload={
-            data : {userId, order},
+            data : {userId, order: order.data},
             event : event
         }
         return FormateData(payload);

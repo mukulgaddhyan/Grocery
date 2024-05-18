@@ -1,10 +1,14 @@
 const ShoppingService = require("../services/shopping-service");
-const { PublishCustomerEvents } = require("../utils");
+// const { PublishCustomerEvents } = require("../utils");
 const UserAuth = require('./middlewares/auth');
+const { SubscribeMessage, PublishMessage } = require('../utils');
+const {CUSTOMER_BINDING_KEY} = require('../config')
 
-module.exports = (app) => {
+module.exports = (app, channel) => {
     
     const service = new ShoppingService();
+
+    SubscribeMessage(channel, service);
 
     app.post('/order',UserAuth, async (req,res,next) => {
 
@@ -15,8 +19,10 @@ module.exports = (app) => {
         try {
             const { data } = await service.PlaceOrder({_id, txnNumber});
 
-            const payload = await service.GetOrderPaylaod(_id, data, 'ORDER_PLACED');
-            PublishCustomerEvents(payload);
+            const payload = await service.GetOrderPaylaod(_id, {data}, 'CREATE_ORDER');
+            // PublishCustomerEvents(payload);
+            console.log(JSON.stringify(payload.data));
+            await PublishMessage(channel, CUSTOMER_BINDING_KEY, JSON.stringify(payload.data));
 
             return res.status(200).json(data);
             

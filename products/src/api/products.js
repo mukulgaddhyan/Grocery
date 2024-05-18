@@ -1,8 +1,10 @@
 const ProductService = require('../services/product-service');
 const UserAuth = require('./middlewares/auth');
-const { PublishCustomerEvents, PublishShoppingEvents } = require('../utils');
+// const { PublishCustomerEvents, PublishShoppingEvents } = require('../utils');
+const { PublishMessage } = require('../utils');
+const { CUSTOMER_BINDING_KEY, SHOPPING_BINDING_KEY } = require('../config');
 
-module.exports = (app) => {
+module.exports = (app, channel) => {
     
     const service = new ProductService();
 
@@ -69,7 +71,8 @@ module.exports = (app) => {
             //Get generic Payload to send to customer service.
             const { data } = await service.GetProductPaylaod(_id, { productId: req.body._id }, 'ADD_TO_WISHLIST') 
 
-            PublishCustomerEvents(data);
+            // PublishCustomerEvents(data);
+            PublishMessage(channel, CUSTOMER_BINDING_KEY, JSON.stringify(data));
         
             return res.status(200).json(data.data.product);
         } catch (err) {
@@ -86,7 +89,9 @@ module.exports = (app) => {
 
             const { data } = await service.GetProductPaylaod(_id, { productId }, 'REMOVE_FROM_WISHLIST') 
 
-            PublishCustomerEvents(data);
+            // PublishCustomerEvents(data);
+            PublishMessage(channel, CUSTOMER_BINDING_KEY, JSON.stringify(data));
+
 
             return res.status(200).json(data.data.product);
         } catch (err) {
@@ -103,8 +108,11 @@ module.exports = (app) => {
 
             const { data } = await service.GetProductPaylaod(req.user._id, { productId: req.body._id, qty: req.body.qty }, 'ADD_TO_CART');
             
-            PublishCustomerEvents(data);
-            PublishShoppingEvents(data);
+            // PublishCustomerEvents(data);
+            PublishMessage(channel, CUSTOMER_BINDING_KEY, JSON.stringify(data));
+            // PublishShoppingEvents(data);
+            PublishMessage(channel, SHOPPING_BINDING_KEY, JSON.stringify(data));
+
 
             console.log("...............",data);
             const response = {
@@ -128,8 +136,11 @@ module.exports = (app) => {
             
             const { data } = await service.GetProductPaylaod(_id, { productId }, 'REMOVE_FROM_CART');
 
-            PublishCustomerEvents(data);
-            PublishShoppingEvents(data);
+            // PublishCustomerEvents(data);
+            PublishMessage(channel, CUSTOMER_BINDING_KEY, JSON.stringify(data));
+            // PublishShoppingEvents(data);\
+            PublishMessage(channel, SHOPPING_BINDING_KEY, JSON.stringify(data));
+
 
             const response = {
                 product: data.data.product,
